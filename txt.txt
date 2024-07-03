@@ -1,0 +1,213 @@
+#ifndef FUNCIONES_H
+#define FUNCIONES_H
+#define NUM_MAX_USUARIO 50
+  
+#include "funciones.c"
+
+///////////////
+//USUARIO
+typedef struct usuario{
+    short ci;
+    short id;
+    char nombre[30];
+
+};
+
+
+
+////////////
+//REGISTRO
+typedef struct fecha{
+	int dd;
+	int mm;
+	int aaaa; 
+}tfecha;
+
+typedef enum {
+    BAJA,
+    MEDIA,
+    ALTA
+} TipoIntensidad;
+
+typedef struct {
+    unsigned duracion;
+    unsigned distancia;
+    TipoIntensidad intensidad;
+}Correr, Caminar, Ciclismo;
+
+typedef struct {
+    unsigned duracion;
+    TipoIntensidad intensidad;
+}Yoga, Crossfit, Pilates, Futbol, Tenis, ArteMarciales, Nadar;
+
+typedef union {
+    Correr correr;
+    Caminar caminar;
+    Ciclismo ciclismo;
+    Yoga yoga;
+    Crossfit crossfit;
+    Pilates pilates;
+    Futbol futbol;
+    Tenis tenis;
+    Nadar nadar;
+    ArteMarciales arteMarciales;
+}DatosActividad;
+
+// Enumeración para tipos de actividad
+typedef enum {
+    CORRER,
+    CAMINAR,
+    CICLISMO,
+    YOGA,
+    CROSSFIT,
+    PILATES,
+    TENIS,
+    FUTBOL,
+    ARTESMARCIALES,
+    NADAR
+} TipoActividad;
+
+typedef struct {            //
+    short baja;
+    short media;
+    short alta;
+} IntensidadMET;
+
+// ACTIVIDAD 
+typedef struct {
+    unsigned id;
+    unsigned idUser;
+    tfecha fecha;
+    TipoActividad tipo;
+    TipoIntensidad intensidad;    
+}tactividad;
+
+
+// Definición de los valores MET para cada actividad e intensidad
+IntensidadMET intensidades[] = {
+    [CORRER] = {4.0, 6.0, 8.0},
+    [CAMINAR] = {2.9, 3.5, 4.0},
+    [CICLISMO] = {4.0, 6.0, 8.0},
+    [NADAR] = {4.0, 5.0, 6.0},
+    [YOGA] = {2.0, 3.0, 4.0},
+    [CROSSFIT] = {5.0, 6.0, 8.0},
+    [PILATES] = {2.0, 3.0, 4.0},
+    [TENIS] = {4.0, 7.0, 8.0},
+    [FUTBOL] = {4.0, 6.0, 8.0},
+    [ARTESMARCIALES] = {4.0, 6.0, 8.0}
+};
+
+void limpearBuffer();
+
+#endif
+
+
+typedef struct {
+    int duracion;
+    int distancia;
+    TipoIntensidad intensidad;
+}Correr, Caminar, Ciclismo;
+
+typedef struct {
+    int duracion;
+    TipoIntensidad intensidad;
+}Yoga, Crossfit, Pilates, Futbol, Tenis, ArteMarciales, Nadar;
+
+typedef union {
+    Correr correr;
+    Caminar caminar;
+    Ciclismo ciclismo;
+    Yoga yoga;
+    Crossfit crossfit;
+    Pilates pilates;
+    Futbol futbol;
+    Tenis tenis;
+    Nadar nadar;
+    ArteMarciales arteMarciales;
+}DatosActividad;
+
+// Definición de los valores MET para cada actividad e intensidad
+IntensidadMET intensidades[] = {
+    [CORRER] = {4.0, 6.0, 8.0},
+    [CAMINAR] = {2.9, 3.5, 4.0},
+    [CICLISMO] = {4.0, 6.0, 8.0},
+    [NADAR] = {4.0, 5.0, 6.0},
+    [YOGA] = {2.0, 3.0, 4.0},
+    [CROSSFIT] = {5.0, 6.0, 8.0},
+    [PILATES] = {2.0, 3.0, 4.0},
+    [TENIS] = {4.0, 7.0, 8.0},
+    [FUTBOL] = {4.0, 6.0, 8.0},
+    [ARTESMARCIALES] = {4.0, 6.0, 8.0}
+};
+
+
+
+void guardarActividad(FILE *file, tactividad *arbolActividad) {
+    if (arbolActividad == NULL) {
+        return;
+    }
+
+    guardarActividad(file, arbolActividad->izq);
+
+    fprintf(file, "Actividad:\n");
+    fprintf(file, "ID: %d\n", arbolActividad->id);
+    fprintf(file, "CI Usuario: %d\n", arbolActividad->ciUser);
+    fprintf(file, "Fecha: %02d/%02d/%04d\n", arbolActividad->fecha.dd, arbolActividad->fecha.mm, arbolActividad->fecha.aaaa);
+    fprintf(file, "Tipo de actividad: %d\n", arbolActividad->tipo);
+    fprintf(file, "Calorías quemadas: %.2f\n", arbolActividad->caloriaQuemadas);
+    fprintf(file, "Duración: %d\n", arbolActividad->datos.duracion);
+    fprintf(file, "Distancia: %d\n", arbolActividad->datos.distancia);
+    fprintf(file, "\n");
+
+    guardarActividad(file, arbolActividad->der);
+}
+
+
+
+void guardarActividad(FILE *file, tactividad *arbolActividad, tactividad *actividad){
+
+    printf("hol %.2f", actividad->caloriaQuemadas);getchar();
+
+    if (arbolActividad == NULL){
+        fprintf(file, "Actividad:\n");
+        fprintf(file, "ID: %d\n", actividad->id);
+        fprintf(file, "CI Usuario: %d\n", actividad->ciUser);
+        fprintf(file, "Fecha: %02d/%02d/%04d\n", actividad->fecha.dd, actividad->fecha.mm, actividad->fecha.aaaa);
+        fprintf(file, "Tipo de actividad: %d\n", actividad->tipo);
+        fprintf(file, "Calorías quemadas: %f\n", actividad->caloriaQuemadas);
+        fprintf(file, "Duración: %d\n", actividad->datos.duracion);
+        fprintf(file, "Distancia: %d\n", actividad->datos.distancia);
+        return;
+    }
+
+    if (actividad->caloriaQuemadas < arbolActividad->caloriaQuemadas ) {
+        fprintf(file, "Subárbol izquierdo:\n");
+        guardarActividad(file, actividad->izq, actividad);
+    }
+
+    if (actividad->caloriaQuemadas >= arbolActividad->caloriaQuemadas) {
+        fprintf(file, "Subárbol derecho:\n");
+        guardarActividad(file, actividad->der, actividad);
+    }
+
+    fprintf(file, "\n");
+}
+
+
+void guardarActividad(FILE *file, tactividad *arbolActividad, tactividad *actividad){
+    if (arbolActividad == NULL) {
+        return;
+    }
+
+    fprintf(file, "Actividad:\n");
+    fprintf(file, "ID: %d\n", arbolActividad->id);
+    fprintf(file, "CI Usuario: %d\n", arbolActividad->ciUser);
+    fprintf(file, "Fecha: %02d/%02d/%04d\n", arbolActividad->fecha.dd, arbolActividad->fecha.mm, arbolActividad->fecha.aaaa);
+    fprintf(file, "Tipo de actividad: %d\n", arbolActividad->tipo);
+    fprintf(file, "Calorías quemadas: %f\n", arbolActividad->caloriaQuemadas);
+    fprintf(file, "Duración: %d\n", arbolActividad->datos.duracion);
+    fprintf(file, "Distancia: %d\n", arbolActividad->datos.distancia);
+
+    guardarActividad(file, arbolActividad->izq, actividad);
+    guardarActividad(file, arbolActividad->der, actividad);
+}
