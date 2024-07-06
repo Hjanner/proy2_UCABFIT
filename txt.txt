@@ -211,3 +211,85 @@ void guardarActividad(FILE *file, tactividad *arbolActividad, tactividad *activi
     guardarActividad(file, arbolActividad->izq, actividad);
     guardarActividad(file, arbolActividad->der, actividad);
 }
+
+
+
+
+
+/////
+
+//TABLA HASH DE ACTIVIDADES
+// ttablaHash *inicializarTH(int maxUsuarios){
+//     ttablaHash *tabla = (ttablaHash*)malloc(sizeof(ttablaHash));
+//     if (tabla == NULL) {
+//         perror("Error al asignar memoria para la tabla hash"); return NULL;
+//     }
+
+//     tabla->NUM_MAX_USUARIOS = maxUsuarios;
+//     tabla->tabla = (tnodoTHActividades*)malloc(sizeof(tnodoTHActividades) * maxUsuarios);
+//     if (tabla->tabla == NULL) {
+//         perror("Error al asignar memoria para la tabla hash"); return NULL;
+//     }
+//     //inicializando cada elemente
+//     for (size_t i = 0; i < maxUsuarios; i++){
+//         tabla->tabla[i].ciUser = -1;
+//         tabla->tabla[i].arbolActividades = NULL;
+//     }
+//     return tabla;
+// }
+
+// int funcionHashArbold(int ciUsaer, int maxUsuarios) {
+//     return ciUsaer % maxUsuarios;
+// }
+
+// void insertarTHARbolActividades( ttablaHash *tabla, int ciUser, tactividad *actividad ){
+//     int indice = funcionHashArbol(ciUser, NUM_MAX_USUARIO);
+//     while ( tabla->tabla[indice].ciUser != -1 ){
+//         indice = (indice + 1) % tabla->NUM_MAX_USUARIOS;
+//     }
+//     tabla->tabla[indice].ciUser = ciUser;
+//     tabla->tabla[indice].arbolActividades = actividad;
+// }
+
+// ttablaHash buscarTHArbolActividades( ttablaHash *tabla, int ciUser ){
+//     int indice = funcionHashArbold(ciUser, NUM_MAX_USUARIO);
+
+//     while (tabla->tabla[indice].clave != ciUser && tabla->tabla[indice].clave != -1) {
+//         indice = (indice + 1) % tabla->NUM_MAX_USUARIOS;
+//     }
+
+//     if (tabla->tabla[indice].clave == ciUser) {
+//         return tabla->tabla[indice].arbolActividades;
+//     }else{
+//         return NULL;
+//     }   
+// }
+
+// void liberarTablaHash(ttablaHash *tabla) {
+//     if (tabla != NULL) {
+//         if (tabla->tabla != NULL) {
+//             free(tabla->tabla);
+//         }
+//         free(tabla);
+//     }
+// }
+
+typedef struct {
+    int ciUser;
+    tactividad *arbolActividades;
+} tnodoTHActividades;
+
+typedef struct {
+    int NUM_MAX_USUARIOS;
+    tnodoTHActividades *tabla;
+} ttablaHash;
+
+typedef struct {                    // Estructura de elemento de  tabla hash
+    int clave;
+    char *valor;
+} Elemento;
+
+typedef struct {                    // Estructura tabla hash
+    int NUM_MAX_USUARIO;
+    Elemento *tabla;
+} TablaHash;

@@ -6,31 +6,31 @@
 //funciones generales
 void limpearBuffer();
 int cadenaVacia(const char *aux);
+const char* insigniaSTR(tinsignias insignia, int op);
+const char* tipoActividadStr(TipoActividad tipo);
+const char* tipoGeneroStr(tgenero tipo);
+void calcularDistanciaUsuario(tusuario *persona, tactividad *actividad);
+void calcularTiempoUsuario(tusuario *persona, tactividad *actividad);
+void calcularCaloriasUsuario(tusuario *persona, tactividad *actividad);
 void azulSetColor();
 void amarilloSetColor();
 void blancoSetColor();
+void MagentaSetColor();
+void CianSetColor();
+void rojoSetColor();
 void saltoLinea();
-
-
-//  MAnin
-// void bienvenida();
-// void limpiarTerminal();
-// void header();
-// void Home(tusuario *persona);
-// int menuInicio();
-// void monitorearActividades();
-// void verAnalisisRendimiento();
-// void menuRegistroAct(tusuario *persona);
-
+void freeTusuario(tusuario *usuario);
 
 //REGISTRO ACTIVIDAD
 void liberarArbolActividad(tactividad* raiz);
 int tomarDistancia();
 int tomarTiempo();
 tfecha ObtenerFecha();
-tfecha ObtenerFecha();
+void calcularUCABCOIN( tusuario *persona, tactividad *actividad );
+void determinarInsigniaNivel(tusuario *persona);
 tactividad *ObtenerDatosActividades(tusuario *persona);
 void imprimirActividad(tactividad *actividad);
+void imprimirArbolActividad(tactividad *actividad);
 tactividad *insertarActividad(tactividad *arbol, tactividad *actividad);
 tactividad *leerArbolActividad(const char *filename);
 void guardarActividad(FILE *file, tactividad *arbolActividad, tactividad *actividad);

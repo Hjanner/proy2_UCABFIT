@@ -1,0 +1,188 @@
+Actividad:
+ID: 704182450
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 1
+Calorías quemadas: 97.056000
+Duración: 2
+Distancia: 2
+Subárbol derecho:
+Actividad:
+ID: 704182521
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 1
+Calorías quemadas: 97.056000
+Duración: 2
+Distancia: 2
+
+Subárbol derecho:
+Actividad:
+ID: 704182526
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 1
+Calorías quemadas: 97.056000
+Duración: 2
+Distancia: 2
+
+Subárbol derecho:
+Actividad:
+ID: 704184938
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 7
+Calorías quemadas: 4549.500000
+Duración: 30
+Distancia: 0
+
+Subárbol izquierdo:
+Actividad:
+ID: 704185053
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 9
+Calorías quemadas: 1516.500000
+Duración: 10
+Distancia: 0
+
+Subárbol izquierdo:
+Actividad:
+ID: 704190236
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 7
+Calorías quemadas: 1061.550049
+Duración: 7
+Distancia: 0
+
+Subárbol izquierdo:
+Actividad:
+ID: 704190848
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 0
+Calorías quemadas: 97.056000
+Duración: 2
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 704191413
+CI Usuario: 23790848
+Fecha: 04/07/2024
+Tipo de actividad: 2
+Calorías quemadas: 218.376007
+Duración: 3
+Distancia: 0
+
+Subárbol izquierdo:
+Actividad:
+ID: 705114115
+CI Usuario: 23790848
+Fecha: 05/07/2024
+Tipo de actividad: 0
+Calorías quemadas: 24.264000
+Duración: 1
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 705115405
+CI Usuario: 23790848
+Fecha: 05/07/2024
+Tipo de actividad: 9
+Calorías quemadas: 1516.500000
+Duración: 10
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 705115516
+CI Usuario: 23790848
+Fecha: 05/07/2024
+Tipo de actividad: 8
+Calorías quemadas: 15013.349609
+Duración: 99
+Distancia: 0
+
+Subárbol izquierdo:
+Actividad:
+ID: 705115547
+CI Usuario: 23790848
+Fecha: 05/07/2024
+Tipo de actividad: 0
+Calorías quemadas: 24.264000
+Duración: 1
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 706103503
+CI Usuario: 23790848
+Fecha: 06/07/2024
+Tipo de actividad: 7
+Calorías quemadas: 6638524.000000
+Duración: 12345
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 706104710
+CI Usuario: 23790848
+Fecha: 06/07/2024
+Tipo de actividad: 9
+Calorías quemadas: 6453.000000
+Duración: 12
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 706104739
+CI Usuario: 23790848
+Fecha: 06/07/2024
+Tipo de actividad: 9
+Calorías quemadas: 19643310.000000
+Duración: 1234567
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 706104800
+CI Usuario: 23790848
+Fecha: 06/07/2024
+Tipo de actividad: 0
+Calorías quemadas: 127465848.000000
+Duración: 12
+Distancia: 123456
+
+Subárbol derecho:
+Actividad:
+ID: 706110455
+CI Usuario: 23790848
+Fecha: 06/07/2024
+Tipo de actividad: 9
+Calorías quemadas: 663583.500000
+Duración: 1234
+Distancia: 0
+
+Subárbol derecho:
+Actividad:
+ID: 706110529
+CI Usuario: 23790848
+Fecha: 06/07/2024
+Tipo de actividad: 0
+Calorías quemadas: 13112412160.000000
+Duración: 12345
+Distancia: 12345
+
+Subárbol derecho:
+Actividad:
+ID: 706111127
+CI Usuario: 23790848
+Fecha: 06/07/2024
+Tipo de actividad: 0
+Calorías quemadas: 13112412160.000000
+Duración: 12345
+Distancia: 12345
+

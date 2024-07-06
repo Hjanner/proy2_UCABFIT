@@ -6,27 +6,29 @@
 //#include "funciones.h"
 
 const int NUM_MAX_USUARIO = 97;
-//#define NUM_MAX_USUARIO 97
-
-
 const char *archivoUsuarios = "usuarios.txt";
 const char *archivoActividadesName = "actividades.txt";
 
-//GENERALES
-void limpearBuffer(){
-    char buffer[100]; 
-    fgets(buffer, sizeof(buffer), stdin);	    // Limpiar buffer de entrada
-}
 
-typedef struct {                    // Estructura de elemento de  tabla hash
-    int clave;
-    char *valor;
-} Elemento;
+typedef enum {
+    BRONCE,
+    PLATA,
+    ORO,
+    PLATINO
+}InsigniaNivel;
 
-typedef struct {                    // Estructura tabla hash
-    int NUM_MAX_USUARIO;
-    Elemento *tabla;
-} TablaHash;
+typedef enum {
+    H1,
+    H2,
+    H3
+}Logros;
+
+typedef struct {
+    Logros calorias;
+    Logros distancia;
+    Logros tiempo;
+    InsigniaNivel nivel;
+}tinsignias;
 
 typedef struct fecha{
     int dd;
@@ -37,6 +39,7 @@ typedef struct fecha{
 typedef struct {
     int duracion;
     int distancia;
+    float caloriaQuemadas;
 }DatosActividad;
 
 // Enumeración para tipos de actividad
@@ -60,19 +63,9 @@ typedef struct nodo{
     tfecha fecha;
     TipoActividad tipo;
     DatosActividad datos;    
-    float caloriaQuemadas;
     struct nodo *der, *izq;
 }tactividad;
 
-typedef struct {
-    int ciUser;
-    tactividad *arbolActividades;
-} tnodoTHActividades;
-
-typedef struct {
-    int NUM_MAX_USUARIOS;
-    tnodoTHActividades *tabla;
-} ttablaHash;
 
 //USUARIO
 typedef enum {
@@ -88,14 +81,21 @@ typedef struct usuario{
     int altura;   //cm
     int peso;     //kg
     int edad;
+    int UCABCOIN;
+    tinsignias insignias;
+    DatosActividad rendimiento;
     tactividad *actividades;
 }tusuario;
 
 /////////////////////////////funciones generales
 int cadenaVacia(const char *aux){
-        if (strlen(aux)== 0)
-            return 1;
+        if (strlen(aux)== 0)    return 1;
         return 0;
+}
+
+void limpearBuffer(){
+    char buffer[100]; 
+    fgets(buffer, sizeof(buffer), stdin);	    // Limpiar buffer de entrada
 }
 
 const char* tipoGeneroStr(tgenero tipo) {
@@ -136,6 +136,57 @@ const char* tipoActividadStr(TipoActividad tipo) {
     }
 }
 
+const char* insigniaSTR(tinsignias insignia, int op) {
+    //1 imprime el nivel, 2, imprime logros de distanci, 3 tiempo, 4 calorias
+    if (op == 1){
+        switch (insignia.nivel) {
+            case BRONCE:
+                return "Bronce";   
+            case PLATA:
+                return "Plata";
+            case ORO:
+                return "Oro";
+            case PLATINO:
+                return "Platino";
+            default:
+                return "Desconocido";
+        }
+    }else if (op == 2 ){
+        switch (insignia.distancia) {
+            case H1:
+                return "+50 KM";   
+            case H2:
+                return "+100 KM";
+            case H3:
+                return "+200 KM";
+            default:
+                return "Desconocido";
+        }
+    }else if (op == 3){
+        switch (insignia.tiempo) {
+            case H1:
+                return "+24h";   
+            case H2:
+                return "+48h";
+            case H3:
+                return "+168h";
+            default:
+                return "Desconocido";
+        }
+    } else if (op == 4){
+        switch (insignia.calorias) {
+            case H1:
+                return "+4500 kcal";   
+            case H2:
+                return "+9000 kcal";
+            case H3:
+                return "+18000 kcal";
+            default:
+                return "Desconocido";
+        }
+    }
+}
+
 void liberarArbolActividad(tactividad* raiz) {
     if (raiz == NULL)  return;
     liberarArbolActividad(raiz->izq);
@@ -143,7 +194,21 @@ void liberarArbolActividad(tactividad* raiz) {
     free(raiz);
 }
 
+void liberarUsuario(tusuario *usuario) {
+    if (usuario == NULL) {
+        return;
+    }
+    liberarArbolActividad(usuario->actividades);
+    free(usuario);
+}
+
 void azulSetColor(){ printf("\033[34m");  }
+
+void MagentaSetColor(){ printf("\033[35m");  }
+
+void CianSetColor(){ printf("\033[36m");  }
+
+void rojoSetColor() { printf("\033[31m");  }
 
 void amarilloSetColor(){ printf("\033[1;33m");  }
 
@@ -151,6 +216,160 @@ void blancoSetColor(){  printf("\033[0m"); }
 
 void saltoLinea(){ printf("\n\n"); }
 
+/////// GAMIFICACION
+void calcularUCABCOIN( tusuario *persona, tactividad *actividad ){
+    int aux1, aux2, aux3;
+    if (actividad->datos.caloriaQuemadas <= 450){             //asignando puntos por calorias quemadas
+        aux1 = 1;
+    }else if (actividad->datos.caloriaQuemadas <= 900){
+        aux1 = 3;
+    }else if(actividad->datos.caloriaQuemadas > 900){
+        aux1 = 5;
+    }
+
+    if (actividad->datos.duracion <= 30){              //asignando puntos por tiempo de ejercicio
+        aux2 = 1;
+    }else if (actividad->datos.duracion <= 60){
+        aux2 = 2;
+    }else if(actividad->datos.duracion > 60){
+        aux2 = 3;
+    }
+
+    if (actividad->datos.distancia == 0){                //asignando puntos por km recorrido
+        aux3 = 0;
+    }else if (actividad->datos.distancia < 3){
+        aux3 = 1;
+    }else if (actividad->datos.distancia <= 5){
+        aux3 = 2;
+    }else if(actividad->datos.distancia > 10){
+        aux3 = 3;
+    }
+    
+    amarilloSetColor();    
+    printf("\nHas recibido %i UCABCOIN por tu desempeño en calorias quemadas!\n", aux1);
+    printf("Has recibido %i UCABCOIN por tu tiempo invertido!\n", aux2);
+    if (aux3 != 0){
+       printf("Has recibido %i UCABCOIN por tu marca de kilometros recorridos!\n", aux3);
+    }
+    blancoSetColor();
+    getchar();
+
+    persona->UCABCOIN += aux1 + aux2 + aux3;
+}
+
+void determinarInsigniaNivel(tusuario *persona){
+    int aux = persona->UCABCOIN;
+    tusuario *insigniaAnter = persona;
+    if (aux <= 50){
+        persona->insignias.nivel = BRONCE;
+    }else if (aux <= 100){
+        persona->insignias.nivel = PLATA;
+    }else if(aux <= 200){
+        persona->insignias.nivel = ORO;
+    }else if ( aux > 201 ){
+        persona->insignias.nivel = PLATINO;
+    }
+
+    //impirmiendo mensaje de cambio de insignia
+    if (insigniaAnter->insignias.nivel != persona->insignias.nivel){
+        amarilloSetColor(); printf("Has alcanzado un nuevo nivel de insignia: %s!\n", insigniaSTR(persona->insignias, 1)); blancoSetColor();
+    }
+}
+
+void calcularDistanciaUsuario(tusuario *persona, tactividad *actividad){
+    if (actividad == NULL || persona == NULL){                                          //validacion
+        perror("Algo salio mal con el calculo de la distancia del usuario."); exit(1);
+    }
+
+    int logroDistAnter = persona->insignias.distancia;          //tomando el logro actual del usuario
+    persona->rendimiento.distancia += actividad->datos.distancia;
+
+    //calculo de insignia
+    if (persona->rendimiento.distancia >= 200) {
+        persona->insignias.distancia = H3;
+    } else if (persona->rendimiento.distancia >= 100) {
+        persona->insignias.distancia = H2;
+    } else if (persona->rendimiento.distancia >= 50) {
+        persona->insignias.distancia = H1;
+    }
+
+    //determinando si cumplio nuevo un logro eimpirmiendo mensaje de cambio de insignia 
+    if (logroDistAnter != persona->insignias.distancia) {
+        if (persona->rendimiento.distancia >= 200) {
+            persona->UCABCOIN += 40;
+        } else if (persona->rendimiento.distancia >= 100) {
+            persona->UCABCOIN += 20;
+        } else if (persona->rendimiento.distancia >= 50) {
+            persona->UCABCOIN += 10;
+        }
+        amarilloSetColor();  printf("Has alcanzado un nuevo Logro!\n\t%s recorridos. Felicitaciones!\n", 
+            insigniaSTR(persona->insignias, 2)); blancoSetColor();
+    }
+}
+
+void calcularTiempoUsuario(tusuario *persona, tactividad *actividad){
+    if (actividad == NULL || persona == NULL){                                          //validacion
+        perror("Algo salio mal con el calculo del tiempo del usuario."); exit(1);
+    }
+
+    int logroAnter = persona->insignias.tiempo;          //tomando el logro actual del usuario
+    persona->rendimiento.duracion += actividad->datos.duracion;
+
+    //calculo de insignia
+    if (persona->rendimiento.distancia >= 8640) {
+        persona->insignias.distancia = H3;
+    } else if (persona->rendimiento.distancia >= 2880) {
+        persona->insignias.distancia = H2;
+    } else if (persona->rendimiento.distancia >= 1440) {
+        persona->insignias.distancia = H1;
+    }
+
+    //impirmiendo mensaje de cambio de insignia si se da
+    if (logroAnter != persona->insignias.distancia) {
+        if (persona->rendimiento.distancia >= 8640) {
+            persona->UCABCOIN += 40;
+        } else if (persona->rendimiento.distancia >= 2880) {
+            persona->UCABCOIN += 20;
+        } else if (persona->rendimiento.distancia >= 1440) {
+            persona->UCABCOIN += 10;
+        }
+        amarilloSetColor();
+        printf("Has alcanzado un nuevo Logro!\n\t%s dedicadas. Felicitaciones!\n", 
+                insigniaSTR(persona->insignias, 3)); blancoSetColor();
+    }
+}
+
+void calcularCaloriasUsuario(tusuario *persona, tactividad *actividad){
+    if (actividad == NULL || persona == NULL){                                          //validacion
+        perror("Algo salio mal con el calculo del tiempo del usuario."); exit(1);
+    }
+
+    int logroAnter = persona->insignias.calorias;          //tomando el logro actual del usuario
+    persona->rendimiento.caloriaQuemadas += actividad->datos.caloriaQuemadas;
+
+    //calculo de insignia
+    if (persona->rendimiento.caloriaQuemadas >= 18000){
+        persona->insignias.calorias = H3;
+    }else if (persona->rendimiento.caloriaQuemadas >= 9000){
+        persona->insignias.calorias = H2;
+    }else if(persona->rendimiento.caloriaQuemadas >= 4500){
+        persona->insignias.calorias = H1;
+    }
+
+    //impirmiendo mensaje de cambio de insignia si se da
+    if (logroAnter != persona->insignias.calorias){
+        if (persona->rendimiento.caloriaQuemadas >= 18000){
+            persona->UCABCOIN += 40;
+        }else if (persona->rendimiento.caloriaQuemadas >= 9000){
+            persona->UCABCOIN += 20;
+        }else if(persona->rendimiento.caloriaQuemadas >= 4500){
+            persona->UCABCOIN += 10;
+        }
+        CianSetColor(); 
+        printf("Has alcanzado un nuevo Logro!\n\t%s quemadas. Felicitaciones!\n", 
+                insigniaSTR(persona->insignias, 4)); blancoSetColor();
+    }
+}
 
 ///////////ACTIVIDADES
 tfecha ObtenerFecha() {
@@ -187,6 +406,11 @@ int tomarDistancia(){
     printf("\nIngrese la distancia a recorrer (km): ");
     scanf("%d", &distancia);
     limpearBuffer();
+    while (distancia <= 0) {
+        printf("La distancia debe ser un número mayor que 0. Intente de nuevo: ");
+        scanf("%d", &distancia);
+        limpearBuffer();
+    }
     return distancia;
 }
 
@@ -195,6 +419,11 @@ int tomarTiempo(){
     printf("Ingrese el tiempo estimado de la actidad (min): ");
     scanf("%d", &tiempo);
     limpearBuffer();
+    while (tiempo <= 0) {
+        printf("El tiempo debe ser un número mayor que 0. Intente de nuevo: ");
+        scanf("%d", &tiempo);
+        limpearBuffer();
+    }
     return tiempo;
 }
 
@@ -211,7 +440,7 @@ tactividad *ObtenerDatosActividades(tusuario *persona){
 	actividad->fecha.mm = fecha.mm;
 	actividad->fecha.aaaa = fecha.aaaa;
 
-	int op;
+	int op = 0;                                     //tomar datos de la actividad
 	do{
         printf("**Menú de Actividades Físicas**\n\n");
         printf("1. Correr\n");
@@ -224,7 +453,6 @@ tactividad *ObtenerDatosActividades(tusuario *persona){
         printf("8. Tenis\n");
         printf("9. Artes Marciales\n");
         printf("10. Nadar\n");
-        //printf("0. Regresar al Menú\n");
         printf("Seleccione una opción: ");
 	 	scanf("%i", &op);
         limpearBuffer();
@@ -272,30 +500,32 @@ tactividad *ObtenerDatosActividades(tusuario *persona){
                 actividad->tipo = NADAR;
                 actividad->datos.duracion = tomarTiempo();
                 break;
-            // case 0:
-            //     printf("\nRegresando al Menú...\n");
-            //     Home(persona);
-            //     break;
             default:
-                printf("\nOpción no válida. Intente de nuevo.\n");
+                op = 0;
+                rojoSetColor(); printf("\nOpción no válida. Intente de nuevo.\n"); blancoSetColor(); getchar();
 	 	}
-
-        if (actividad->datos.duracion != 0){
-            int get;
-            if (persona->genero == MASCULINO){
-                get = ((10 * persona->peso) + (6,25 * persona->altura) - (5 * persona->edad) + 5) * 1.5;
-            }else{
-                get = ((10 * persona->peso) + (6,25 * persona->altura) - (5 * persona->edad) - 161) * 1.5;
-            }
-
-            actividad->caloriaQuemadas = get * actividad->datos.duracion;          
-            if (actividad->datos.distancia != 0) 
-                actividad->caloriaQuemadas *= actividad->datos.distancia;
-        }
 	} while (op == 0); 
-    amarilloSetColor(); printf("\n\nActividad Registrada exitosamente.\n");
-    blancoSetColor(); printf("Volviendo Al Inicio. Presione para continuar..\n"); getchar();
 
+    //calcular calorias de la actividad
+    if (actividad->datos.duracion != 0){                
+        int get;
+        if (persona->genero == MASCULINO){
+            get = ((5 * persona->peso) + (0,55 * persona->altura) - (5 * persona->edad)) + 5 ;
+        }else{
+            get = ((5 * persona->peso) + (0,55 * persona->altura) - (5 * persona->edad)) - 161;
+        }
+
+        actividad->datos.caloriaQuemadas = get * actividad->datos.duracion  * 0.05;         //calculos por tiempo y distancia de la actividad       
+        if (actividad->datos.distancia != 0) 
+            actividad->datos.caloriaQuemadas *= actividad->datos.distancia * 0.16;
+    }
+
+    //calculos de sistemas de gamificacion
+    calcularUCABCOIN(persona, actividad);
+    determinarInsigniaNivel(persona);
+    calcularDistanciaUsuario(persona, actividad);
+    calcularTiempoUsuario(persona, actividad);
+    calcularCaloriasUsuario(persona, actividad);
 	return actividad;
 }
 
@@ -309,7 +539,16 @@ void imprimirActividad(tactividad *actividad){
     if (actividad->datos.duracion) 
         printf("Duración: %d minutos\n", actividad->datos.duracion); 
     
-    printf("Calorías quemadas: %.2f\n", actividad->caloriaQuemadas);
+    printf("Calorías quemadas: %.2f\n", actividad->datos.caloriaQuemadas);
+}
+
+void imprimirArbolActividad(tactividad *actividad){
+    if (actividad == NULL)
+        return;
+
+    imprimirActividad(actividad);
+    imprimirArbolActividad(actividad->izq);
+    imprimirArbolActividad(actividad->der);
 }
 
 tactividad *insertarActividad(tactividad *arbol, tactividad *actividad){
@@ -317,25 +556,33 @@ tactividad *insertarActividad(tactividad *arbol, tactividad *actividad){
         return actividad;
     }
 
-    if (actividad->caloriaQuemadas < (arbol)->caloriaQuemadas){
+    if (actividad->datos.caloriaQuemadas < (arbol)->datos.caloriaQuemadas){
         arbol->izq = insertarActividad(arbol->izq, actividad);
-    }else if (actividad->caloriaQuemadas >= (arbol)->caloriaQuemadas){
+    }else if (actividad->datos.caloriaQuemadas >= (arbol)->datos.caloriaQuemadas){
         arbol->der = insertarActividad(arbol->der, actividad);
     }
     return arbol;
 }
 
 tactividad *leerArbolActividad(const char *filename){
-    FILE *file = fopen(filename, "rt");
-    if (file == NULL) {
-        perror("Error al abrir el archivo"); exit(1);
-    }
+	FILE *file = fopen(filename, "rt");                             //apertura del archivo
+	if (file == NULL){
+        file = fopen(filename, "wt");                         //creando archivo sino existe
+        if (file == NULL){
+            printf("Error al crear el archivo"); exit(1);
+        }
+        fclose(file);
+
+        file = fopen(filename, "rt");                        
+        if (file == NULL){
+            printf("Error al abrir el archivo"); exit(1);
+        }
+	} 
+
     tactividad *arbol = NULL;
     char buffer[1024];
 
     while (fgets(buffer, 1024, file) != NULL) {
-            printf("hoa1"); getchar();
-
         if (strncmp(buffer, "Actividad:", 10) == 0) {
             tactividad* actividad = (tactividad*) malloc(sizeof(tactividad));
 
@@ -348,14 +595,13 @@ tactividad *leerArbolActividad(const char *filename){
             fgets(buffer, 1024, file);
             sscanf(buffer, "Tipo de actividad: %d\n", (int*)&actividad->tipo);
             fgets(buffer, 1024, file);            
-            sscanf(buffer, "Calorías quemadas: %f\n", &actividad->caloriaQuemadas);
+            sscanf(buffer, "Calorías quemadas: %f\n", &actividad->datos.caloriaQuemadas);
             fgets(buffer, 1024, file);
             sscanf(buffer, "Duración: %d\n", &actividad->datos.duracion);
             fgets(buffer, 1024, file);
             sscanf(buffer, "Distancia: %d\n", &actividad->datos.distancia);
             actividad->izq = actividad->der = NULL;
             arbol = insertarActividad(arbol, actividad);
-            free(actividad);
         }
     }
     fclose(file);
@@ -369,17 +615,17 @@ void guardarActividad(FILE *file, tactividad *arbolActividad, tactividad *activi
         fprintf(file, "CI Usuario: %d\n", actividad->ciUser);
         fprintf(file, "Fecha: %02d/%02d/%04d\n", actividad->fecha.dd, actividad->fecha.mm, actividad->fecha.aaaa);
         fprintf(file, "Tipo de actividad: %d\n", actividad->tipo);
-        fprintf(file, "Calorías quemadas: %f\n", actividad->caloriaQuemadas);
+        fprintf(file, "Calorías quemadas: %f\n", actividad->datos.caloriaQuemadas);
         fprintf(file, "Duración: %d\n", actividad->datos.duracion);
         fprintf(file, "Distancia: %d\n", actividad->datos.distancia);
         return;
     }
 
-    if (actividad->caloriaQuemadas < arbolActividad->caloriaQuemadas ) {
+    if (actividad->datos.caloriaQuemadas < arbolActividad->datos.caloriaQuemadas ) {
         fprintf(file, "Subárbol izquierdo:\n");
         guardarActividad(file, actividad->izq, actividad);
     }
-    if (actividad->caloriaQuemadas >= arbolActividad->caloriaQuemadas) {
+    if (actividad->datos.caloriaQuemadas >= arbolActividad->datos.caloriaQuemadas) {
         fprintf(file, "Subárbol derecho:\n");
         guardarActividad(file, actividad->der, actividad);
     }
@@ -394,62 +640,7 @@ void guardarDatosEnArchivo(const char *filename, tactividad *arbol, tactividad *
     }
     guardarActividad(file, arbol, actividad);
     fclose(file);
-}
-
-
-//TABLA HASH DE ACTIVIDADES
-ttablaHash *inicializarTH(int maxUsuarios){
-    ttablaHash *tabla = (ttablaHash*)malloc(sizeof(ttablaHash));
-    if (tabla == NULL) {
-        perror("Error al asignar memoria para la tabla hash"); return NULL;
-    }
-
-    tabla->NUM_MAX_USUARIOS = maxUsuarios;
-    tabla->tabla = (tnodoTHActividades*)malloc(sizeof(tnodoTHActividades) * maxUsuarios);
-    if (tabla->tabla == NULL) {
-        perror("Error al asignar memoria para la tabla hash"); return NULL;
-    }
-    //inicializando cada elemente
-    for (size_t i = 0; i < maxUsuarios; i++){
-        tabla->tabla[i].ciUser = -1;
-        tabla->tabla[i].arbolActividades = NULL;
-    }
-    return tabla;
-}
-
-int funcionHashArbold(int ciUsaer, int maxUsuarios) {
-    return ciUsaer % maxUsuarios;
-}
-
-void insertarTHARbolActividades( ttablaHash *tabla, int ciUser, tactividad *actividad ){
-    int indice = funcionHashArbol(ciUser, NUM_MAX_USUARIO);
-    while ( tabla->tabla[indice].ciUser != -1 ){
-        indice = (indice + 1) % tabla->NUM_MAX_USUARIOS;
-    }
-    tabla->tabla[indice].ciUser = ciUser;
-    tabla->tabla[indice].arbolActividades = actividad;
-}
-
-ttablaHash buscarTHArbolActividades( ttablaHash *tabla, int ciUser ){
-    int indice = funcionHashArbold(ciUser, NUM_MAX_USUARIO);
-
-    while (tabla->tabla[indice].clave != ciUser && tabla->tabla[indice].clave != -1) {
-        indice = (indice + 1) % tabla->NUM_MAX_USUARIOS;
-    }
-
-    if (tabla->tabla[indice].clave == ciUser) {
-        return tabla->tabla[indice].arbolActividades;
-    }else{
-        return NULL;
-    }   
-}
-
-void liberarTablaHash(ttablaHash *tabla) {
-    if (tabla != NULL) {
-        if (tabla->tabla != NULL) {
-            free(tabla->tabla);
-        }
-        free(tabla);
-    }
+    CianSetColor(); printf("\nActividad Registrada exitosamente.\n\n");
+    blancoSetColor(); printf("Volviendo Al Inicio. Presione para continuar..\n"); getchar();
 }
 

@@ -75,6 +75,9 @@ void menuRegistroAct(tusuario *persona){
     tactividad *actividad = ObtenerDatosActividades(persona);
     tactividad *arbol = leerArbolActividad(archivoActividadesName);
     guardarDatosEnArchivo(archivoActividadesName, arbol, actividad);
+    liberarArbolActividad(actividad);
+    liberarArbolActividad(arbol);
+    menuInicio();
 }
 
 void Home(tusuario *persona){
@@ -114,7 +117,7 @@ void Home(tusuario *persona){
                 printf("\n¡Gracias por usar UCAB FIT! Saliendo del sistema...\n"); limpiarTermial();
                 break;
             default:
-                printf("\nOpción no válida. Intente de nuevo.\n"); limpiarTermial();
+                rojoSetColor(); printf("\nOpción no válida. Intente de nuevo.\n"); blancoSetColor(); getchar();
                 Home(persona);
             }
     } while ( h != 1);
@@ -130,12 +133,21 @@ int main(){
     persona->peso = 80;
     persona->edad = 20;
     persona->genero = MASCULINO;
+    persona->UCABCOIN = 0;
+    persona->insignias.nivel = BRONCE;
+    persona->insignias.distancia = H1;
+    persona->insignias.tiempo = H1;
+    persona->insignias.calorias = H1;
 
+    // printf("nivel: %s", insigniaSTR(persona->insignias, 1));
+    // printf("insignia de dist: %s", insigniaSTR(persona->insignias, 2));
 
+    // getchar();
 
     if (persona)
         Home(persona);
-    
-    //limpear variables
+
+    liberarUsuario(persona);    
+    MagentaSetColor(); printf("Desarrolado por:\n\tHernández Hanner \n\tVielma Alejandro\n\n");
     return 0;
 }
