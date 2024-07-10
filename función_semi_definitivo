@@ -1,0 +1,646 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+//#include "funciones.h"
+
+const int NUM_MAX_USUARIO = 100;
+const char *archivoUsuarios = "usuarios.txt";
+const char *archivoActividadesName = "actividades.txt";
+
+
+typedef enum {
+    BRONCE,
+    PLATA,
+    ORO,
+    PLATINO
+}InsigniaNivel;
+
+typedef enum {
+    H1,
+    H2,
+    H3
+}Logros;
+
+typedef struct {
+    Logros calorias;
+    Logros distancia;
+    Logros tiempo;
+    InsigniaNivel nivel;
+}tinsignias;
+
+typedef struct fecha{
+    int dd;
+    int mm;
+    int aaaa;
+}tfecha;
+
+typedef struct {
+    int duracion;
+    int distancia;
+    float caloriaQuemadas;
+}DatosActividad;
+
+// Enumeración para tipos de actividad
+typedef enum {
+    CORRER,
+    CAMINAR,
+    CICLISMO,
+    YOGA,
+    CROSSFIT,
+    PILATES,
+    TENIS,
+    FUTBOL,
+    ARTESMARCIALES,
+    NADAR
+} TipoActividad;
+
+// ACTIVIDAD 
+typedef struct nodo{
+    int id;
+    int ciUser;
+    tfecha fecha;
+    TipoActividad tipo;
+    DatosActividad datos;    
+    struct nodo *der, *izq;
+}tactividad;
+
+
+//USUARIO
+typedef enum {
+    FEMENINO,
+    MASCULINO
+} tgenero;
+
+typedef struct usuario{
+    int ci;
+    char nombre[30];
+    tgenero genero;
+    int altura;   //cm
+    int peso;     //kg
+    int edad;
+    int UCABCOIN;
+    tinsignias insignias;
+    DatosActividad rendimiento;
+    tactividad *actividades;
+}tusuario;
+
+// TABLA HASH
+typedef struct {
+    int capacidad;
+    tusuario *tabla;
+}TablaHash;
+
+
+/////////////////////////////funciones generales
+int cadenaVacia(const char *aux){
+        if (strlen(aux)== 0)    return 1;
+        return 0;
+}
+
+void limpearBuffer(){
+    char buffer[100]; 
+    fgets(buffer, sizeof(buffer), stdin);	    // Limpiar buffer de entrada
+}
+
+const char* tipoGeneroStr(tgenero tipo) {
+    switch (tipo) {
+        case MASCULINO:
+            return "Masculino";
+        case FEMENINO:
+            return "Femenino";
+        default:
+            return "Desconocido";
+    }
+}
+
+const char* tipoActividadStr(TipoActividad tipo) {
+    switch (tipo) {
+        case CORRER:
+            return "Correr";
+        case CAMINAR:
+            return "Caminar";
+        case CICLISMO:
+            return "Ciclismo";
+        case YOGA:
+            return "Yoga";
+        case CROSSFIT:
+            return "CrossFit";
+        case PILATES:
+            return "Pilates";
+        case TENIS:
+            return "Tenis";
+        case FUTBOL:
+            return "Futbol";
+        case ARTESMARCIALES:
+            return "Artes Marciales";
+        case NADAR:
+            return "Nadar";
+        default:
+            return "Desconocido";
+    }
+}
+
+const char* insigniaSTR(tinsignias insignia, int op) {
+    //1 imprime el nivel, 2, imprime logros de distanci, 3 tiempo, 4 calorias
+    if (op == 1){
+        switch (insignia.nivel) {
+            case BRONCE:
+                return "Bronce";   
+            case PLATA:
+                return "Plata";
+            case ORO:
+                return "Oro";
+            case PLATINO:
+                return "Platino";
+            default:
+                return "Desconocido";
+        }
+    }else if (op == 2 ){
+        switch (insignia.distancia) {
+            case H1:
+                return "+50 KM";   
+            case H2:
+                return "+100 KM";
+            case H3:
+                return "+200 KM";
+            default:
+                return "Desconocido";
+        }
+    }else if (op == 3){
+        switch (insignia.tiempo) {
+            case H1:
+                return "+24h";   
+            case H2:
+                return "+48h";
+            case H3:
+                return "+168h";
+            default:
+                return "Desconocido";
+        }
+    } else if (op == 4){
+        switch (insignia.calorias) {
+            case H1:
+                return "+4500 kcal";   
+            case H2:
+                return "+9000 kcal";
+            case H3:
+                return "+18000 kcal";
+            default:
+                return "Desconocido";
+        }
+    }
+}
+
+void liberarArbolActividad(tactividad* raiz) {
+    if (raiz == NULL)  return;
+    liberarArbolActividad(raiz->izq);
+    liberarArbolActividad(raiz->der);
+    free(raiz);
+}
+
+void liberarUsuario(tusuario *usuario) {
+    if (usuario == NULL) {
+        return;
+    }
+    liberarArbolActividad(usuario->actividades);
+    free(usuario);
+}
+
+void azulSetColor(){ printf("\033[34m");  }
+
+void MagentaSetColor(){ printf("\033[35m");  }
+
+void CianSetColor(){ printf("\033[36m");  }
+
+void rojoSetColor() { printf("\033[31m");  }
+
+void amarilloSetColor(){ printf("\033[1;33m");  }
+
+void blancoSetColor(){  printf("\033[0m"); }
+
+void saltoLinea(){ printf("\n\n"); }
+
+// TABLA HASH
+TablaHash *crear_tabla(){
+    TablaHash *tabla = malloc(sizeof(TablaHash));
+    tabla->capacidad = NUM_MAX_USUARIO;
+    tabla->tabla = (tusuario*) malloc(sizeof(tusuario) * NUM_MAX_USUARIO);
+    for (int i = 0; i < NUM_MAX_USUARIO; i++){
+        tabla->tabla[i].ci = -1;
+        strcpy(tabla->tabla[i].nombre," ");
+        tabla->tabla[i].edad = 0;
+        tabla->tabla[i].altura = 0;
+        tabla->tabla[i].peso = 0;
+        tabla->tabla[i].UCABCOIN = 0;
+        tabla->tabla[i].insignias.nivel = BRONCE;
+        tabla->tabla[i].insignias.distancia = H1;
+        tabla->tabla[i].insignias.tiempo = H1;
+        tabla->tabla[i].insignias.calorias = H1;
+    }
+
+    return tabla;
+
+}
+
+TablaHash *insertar_tabla_hash(TablaHash *tabla,int ci,char *nombre,tgenero genero, int edad, int altura, int peso){
+    int indice = ci % tabla->capacidad;
+    while(tabla->tabla[indice].ci != -1){
+        indice = (indice + 1) % tabla->capacidad;
+    }
+    tabla->tabla[indice].ci = ci;
+    strcpy(tabla->tabla[indice].nombre,nombre);
+    tabla->tabla[indice].genero = genero;
+    tabla->tabla[indice].edad = edad;
+    tabla->tabla[indice].altura = altura;
+    tabla->tabla[indice].peso = peso;
+    return tabla;
+}
+
+TablaHash *leer_tabla_hash(){
+    FILE *file = fopen("usuarios.txt", "rt");                             //apertura del archivo
+	if (file == NULL){
+        file = fopen("usuarios.txt", "wt");                         //creando archivo sino existe
+        if (file == NULL){
+            printf("Error al crear el archivo"); exit(1);
+        }
+        fclose(file);
+
+        file = fopen("usuarios.txt", "rt");                        
+        if (file == NULL){
+            printf("Error al abrir el archivo"); exit(1);
+        }
+	} 
+
+    TablaHash *tabla = crear_tabla();
+    char buffer[1024];
+    char nombre[30];
+    char genero[15];
+    tgenero generos;
+    int ci;
+    int altura;
+    int peso;
+    int edad;
+    while (fgets(buffer, 1024, file) != NULL) {
+        if (strncmp(buffer, "Usuarios:", 9) == 0) {
+            fgets(buffer, 1024, file);
+            sscanf(buffer, "CI Usuario: %d\n",&ci);
+            fgets(buffer, 1024, file);
+            sscanf(buffer, "Nombre: %s\n",nombre);
+            fgets(buffer, 1024,file);
+            sscanf(buffer, "Genero: %s\n",genero);
+            if (strcmp(genero,"Masculino") == 0){
+                generos = MASCULINO;
+            }
+            else{
+                generos = FEMENINO;
+            }
+            fgets(buffer, 1024, file);
+            sscanf(buffer, "Edad: %d\n",&edad);
+            fgets(buffer, 1024, file);            
+            sscanf(buffer, "Altura: %d\n", &altura);
+            fgets(buffer, 1024, file);
+            sscanf(buffer, "Peso: %d\n", &peso);
+            tabla = insertar_tabla_hash(tabla,ci,nombre,generos,edad,altura,peso);
+        }
+    }
+    fclose(file);
+    return tabla;
+}
+
+void guardarTablaHash(TablaHash *tabla){
+    FILE *file = fopen("usuarios.txt","at");
+    char generos[15];
+    for (int i = 0; i < tabla->capacidad; i++){
+        if (tabla->tabla[i].ci != -1){
+            fprintf(file, "Usuarios:\n");
+            fprintf(file, "CI Usuario: %d\n", tabla->tabla[i].ci);
+            fprintf(file, "Nombre: %s\n", tabla->tabla[i].nombre);
+            strcpy(generos,tipoGeneroStr(tabla->tabla[i].genero));
+            fprintf(file, "Genero: %s\n",generos);
+            strcpy(generos," ");
+            fprintf(file, "Edad: %d\n", tabla->tabla[i].edad);
+            fprintf(file, "Altura: %d\n", tabla->tabla[i].altura);
+            fprintf(file, "Peso: %d\n", tabla->tabla[i].peso);
+        }
+    }
+    fclose(file);
+    return;
+}
+
+int verificar_cedula(TablaHash *tabla, int ci){
+    int indice = ci % tabla->capacidad;
+    while(tabla->tabla[indice].ci != ci && tabla->tabla[indice].ci != -1){
+        indice = (indice + 1) % tabla->capacidad;
+    }
+    if (tabla->tabla[indice].ci == ci){
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
+
+int validarCI(char ci[15], int caso ){		//var caso 1 si es procedimiento registro, 2 para donaciones
+	FILE *archivo = fopen("usuarios.txt", "rt");										//abriendo archivo
+	if (archivo == NULL){			//si el archivo no existe
+		fclose(archivo);
+		if (caso == 1) return 1;	//para el proceso de registro, indica que es el primer usuario por lo tanto, la ci es valida
+		if (caso == 2) {			//para el proceso de donaciones, indica no hay datos registradps
+			printf("No hay datos regisitrado.\n");
+			//retornar al menu principal
+			return 0;
+		}	 
+	}
+    fclose(archivo);
+	int clave;
+    sscanf(ci, "%d", &clave);
+    TablaHash *tabla = leer_tabla_hash();
+	//leer cedula
+    int verificacion;
+    verificacion = verificar_cedula(tabla, clave);
+
+    if (caso == 1)	{
+        if (verificacion == 0){
+            return 1; //la cedula es valida para el registro porque no se encuantra en la data
+        }
+        else{
+            printf("\nEl usuario ya se encuentra registrado\n");
+            return 0;
+        }	
+    }
+    if ( caso == 2){
+        if (verificacion == 1){
+            return 1;
+        }
+        else{
+            printf("La cedula no se encuentra registrada. Intende de nuevo. \n"); 
+            return 0; //indica que no es valida para la donacion ya que no se encuentra registrada
+        }			
+    }
+}
+
+
+
+void EscribirEnArchivoTXT(const char *nombreArchivo, TablaHash *tabla){
+    FILE *file = fopen("usuarios.txt", "at");
+    if (file == NULL) {
+        perror("Error al abrir el archivo");
+        return;
+    }
+    fclose(file);
+    guardarTablaHash(tabla);
+    CianSetColor(); printf("\nUsuario Registrado exitosamente.\n\n");
+    blancoSetColor(); printf("Volviendo Al Inicio. Presione para continuar..\n"); getchar();
+}
+
+TablaHash *obtener_datos_perfil(){
+    FILE *file = fopen("usuarios.txt","at");
+    fclose(file);
+    TablaHash *tabla = crear_tabla();
+    char ci[15];
+    int cedula;
+    char nombre[30];
+    int edad;
+    char edades[8];
+    int peso;
+    char pesos[10];
+    int altura;
+    tgenero genero;
+    char alturas[10];
+    int valido;  
+	do{                                                                   //validando ci
+        do{                                                               //validando que solo contenga numeros
+            valido = 1;
+            printf("Ingrese su cedula: "); 
+            fgets(ci, 15, stdin);
+            ci[strcspn(ci, "\n")] = '\0';
+            valido = !cadenaVacia(ci);
+            for (int i = 0; ci[i] != '\0'; i++){
+                if (!isdigit(ci[i])){
+                    printf("La cédula solo debe contener números. Intente de nuevo.\n");
+                    valido = 0;
+                    break;
+                }
+            }
+        } while (valido == 0);
+	}while(validarCI(ci, 1) == 0);
+
+    do{                                                                       //validando nombre
+        valido = 1;
+        printf("Ingrese su nombre: "); 
+        fgets(nombre, 25, stdin);
+        nombre[strcspn(nombre, "\n")] = '\0';
+        valido = !cadenaVacia(nombre);
+        for (int i = 0; nombre[i] != '\0'; i++){
+            if (!isalpha(nombre[i]) && nombre[i] != ' ' ){
+                printf("El nombre solo debe contener letras. Intente de nuevo.\n");
+                valido = 0;
+                break;
+            }
+        }
+    }while(valido == 0);
+
+    int op;
+	do{
+        limpearBuffer();
+	 	printf("Indique su genero: \n");
+	 	printf("1. Masculino\n");
+	 	printf("2. Femenino\n");
+	 	printf("Opcion: ");
+	 	scanf("%i", &op);
+        limpearBuffer();
+	 	switch (op) {
+	 		case 1 :
+	 			genero = MASCULINO;
+	 			break;
+	 		case 2 :
+	 			genero = FEMENINO;
+	 			break;
+	 		default : 
+	 			op = 0;
+	 			printf("La opcion elegida no esta dentro de la lista. Intente de nuevo.\n");
+	 			break;
+	 	}
+	} while (op == 0); 
+    do{                                                         //validar telefono
+        valido = 1;
+        printf("Ingrese su edad: "); 
+        fgets(edades, 7, stdin);
+        edades[strcspn(edades, "\n")] = '\0';
+        valido = !cadenaVacia(edades);
+        for (int i = 0; edades[i] != '\0'; i++){
+            if (!isdigit(edades[i])){
+                printf("La edad solo debe contener numeros enteros. Intente de nuevo\n");
+                valido = 0;
+                break;
+            }
+        }
+    } while (valido == 0);
+
+    do{                                                         //validar telefono
+        valido = 1;
+        printf("Ingrese su peso (Kg): "); 
+        fgets(pesos, 7, stdin);
+        pesos[strcspn(pesos, "\n")] = '\0';
+        valido = !cadenaVacia(pesos);
+        for (int i = 0; pesos[i] != '\0'; i++){
+            if (!isdigit(pesos[i])){
+                printf("El peso debe ser entero (Redondeelo en caso de necesitarlo).\n");
+                valido = 0;
+                break;
+            }
+        }
+    } while (valido == 0);
+
+    do{                                                         //validar telefono
+        valido = 1;
+        printf("Ingrese su altura (cm): "); 
+        fgets(alturas, 7, stdin);
+        alturas[strcspn(alturas, "\n")] = '\0';
+        valido = !cadenaVacia(alturas);
+        for (int i = 0; alturas[i] != '\0'; i++){
+            if (!isdigit(alturas[i])){
+                printf("La altura debe ser entera y en cm.\n");
+                valido = 0;
+                break;
+            }
+        }
+    } while (valido == 0);
+
+    sscanf(edades,"%d",&edad);
+    sscanf(alturas,"%d",&altura);
+    sscanf(pesos, "%d",&peso);
+    sscanf(ci, "%d",&cedula);
+    tabla = insertar_tabla_hash(tabla,cedula,nombre,genero,edad,altura,peso);
+    limpearBuffer();
+	return tabla;
+}
+
+tusuario *leer_usuario(TablaHash *tabla, int ci){
+    int indice = ci % tabla->capacidad;
+    while(tabla->tabla[indice].ci != ci && tabla->tabla[indice].ci != -1){
+        indice = (indice + 1) % tabla->capacidad;
+    }
+    tusuario *persona = (tusuario *) malloc(sizeof(tusuario));
+    persona->ci = tabla->tabla[indice].ci;
+    strcpy(persona->nombre,tabla->tabla[indice].nombre);
+    persona->genero = tabla->tabla[indice].genero;
+    persona->altura = tabla->tabla[indice].altura;
+    persona->peso = tabla->tabla[indice].peso;
+    persona->edad = tabla->tabla[indice].edad;
+    persona->UCABCOIN = tabla->tabla[indice].UCABCOIN;
+    persona->insignias.nivel = tabla->tabla[indice].insignias.nivel;
+    persona->insignias.distancia = tabla->tabla[indice].insignias.distancia;
+    persona->insignias.tiempo = tabla->tabla[indice].insignias.tiempo;
+    persona->insignias.calorias = tabla->tabla[indice].insignias.calorias;
+    return persona;
+}
+/////// GAMIFICACION
+void calcularUCABCOIN( tusuario *persona, tactividad *actividad ){
+    int aux1, aux2, aux3;
+    if (actividad->datos.caloriaQuemadas <= 450){             //asignando puntos por calorias quemadas
+        aux1 = 1;
+    }else if (actividad->datos.caloriaQuemadas <= 900){
+        aux1 = 3;
+    }else if(actividad->datos.caloriaQuemadas > 900){
+        aux1 = 5;
+    }
+
+    if (actividad->datos.duracion <= 30){              //asignando puntos por tiempo de ejercicio
+        aux2 = 1;
+    }else if (actividad->datos.duracion <= 60){
+        aux2 = 2;
+    }else if(actividad->datos.duracion > 60){
+        aux2 = 3;
+    }
+
+    if (actividad->datos.distancia == 0){                //asignando puntos por km recorrido
+        aux3 = 0;
+    }else if (actividad->datos.distancia < 3){
+        aux3 = 1;
+    }else if (actividad->datos.distancia <= 5){
+        aux3 = 2;
+    }else if(actividad->datos.distancia > 10){
+        aux3 = 3;
+    }
+    
+    amarilloSetColor();    
+    printf("\nHas recibido %i UCABCOIN por tu desempeño en calorias quemadas!\n", aux1);
+    printf("Has recibido %i UCABCOIN por tu tiempo invertido!\n", aux2);
+    if (aux3 != 0){
+       printf("Has recibido %i UCABCOIN por tu marca de kilometros recorridos!\n", aux3);
+    }
+    blancoSetColor();
+    getchar();
+
+    persona->UCABCOIN += aux1 + aux2 + aux3;
+}
+
+void determinarInsigniaNivel(tusuario *persona){
+    int aux = persona->UCABCOIN;
+    tusuario *insigniaAnter = persona;
+    if (aux <= 50){
+        persona->insignias.nivel = BRONCE;
+    }else if (aux <= 100){
+        persona->insignias.nivel = PLATA;
+    }else if(aux <= 200){
+        persona->insignias.nivel = ORO;
+    }else if ( aux > 201 ){
+        persona->insignias.nivel = PLATINO;
+    }
+
+    //impirmiendo mensaje de cambio de insignia
+    if (insigniaAnter->insignias.nivel != persona->insignias.nivel){
+        amarilloSetColor(); printf("Has alcanzado un nuevo nivel de insignia: %s!\n", insigniaSTR(persona->insignias, 1)); blancoSetColor();
+    }
+}
+
+void calcularDistanciaUsuario(tusuario *persona, tactividad *actividad){
+    if (actividad == NULL || persona == NULL){                                          //validacion
+        perror("Algo salio mal con el calculo de la distancia del usuario."); exit(1);
+    }
+
+    int logroDistAnter = persona->insignias.distancia;          //tomando el logro actual del usuario
+    persona->rendimiento.distancia += actividad->datos.distancia;
+
+    //calculo de insignia
+    if (persona->rendimiento.distancia >= 200) {
+        persona->insignias.distancia = H3;
+    } else if (persona->rendimiento.distancia >= 100) {
+        persona->insignias.distancia = H2;
+    } else if (persona->rendimiento.distancia >= 50) {
+        persona->insignias.distancia = H1;
+    }
+
+    //determinando si cumplio nuevo un logro eimpirmiendo mensaje de cambio de insignia 
+    if (logroDistAnter != persona->insignias.distancia) {
+        if (persona->rendimiento.distancia >= 200) {
+            persona->UCABCOIN += 40;
+        } else if (persona->rendimiento.distancia >= 100) {
+            persona->UCABCOIN += 20;
+        } else if (persona->rendimiento.distancia >= 50) {
+            persona->UCABCOIN += 10;
+        }
+        amarilloSetColor();  printf("Has alcanzado un nuevo Logro!\n\t%s recorridos. Felicitaciones!\n", 
+            insigniaSTR(persona->insignias, 2)); blancoSetColor();
+    }
+}
+
+void calcularTiempoUsuario(tusuario *persona, tactividad *actividad){
+    if (actividad == NULL || persona == NULL){                                          //validacion
+        perror("Algo salio mal con el calculo del tiempo del usuario."); exit(1);
+    }
+
+    int logroAnter = persona->insignias.tiempo;          //tomando el logro actual del usuario
+    persona->rendimiento.duracion += actividad->datos.duracion;
+
+    //calculo de insignia
+    if (persona->rendimiento.distancia >= 8640) {
+        persona->insignias.distancia = H3;
+    } else if (persona->rendimiento.distancia >= 2880) {
+        persona->insignias.distancia = H2;
+    } else if (persona->rendimiento.distancia >= 1440) {
+        persona->insignias.
