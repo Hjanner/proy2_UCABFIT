@@ -1,0 +1,53 @@
+#ifndef FUNCIONES_H
+#define FUNCIONES_H
+#include "funciones.c"
+//#include "main.c"
+
+//funciones generales
+void limpearBuffer();
+int cadenaVacia(const char *aux);
+const char* insigniaSTR(tinsignias insignia, int op);
+const char* tipoActividadStr(TipoActividad tipo);
+const char* tipoGeneroStr(tgenero tipo);
+void calcularDistanciaUsuario(tusuario *persona, tactividad *actividad);
+void calcularTiempoUsuario(tusuario *persona, tactividad *actividad);
+void calcularCaloriasUsuario(tusuario *persona, tactividad *actividad);
+void azulSetColor();
+void amarilloSetColor();
+void blancoSetColor();
+void MagentaSetColor();
+void CianSetColor();
+void rojoSetColor();
+void saltoLinea();
+void freeTusuario(tusuario *usuario);
+
+//TABLA HASH
+TablaHash *crear_tabla();
+TablaHash *insertar_tabla_hash(TablaHash *tabla,int ci,char *nombre,tgenero genero, int edad, int altura, int peso);
+TablaHash *leer_tabla_hash();
+void guardarTablaHash(TablaHash *tabla);
+int verificar_cedula(TablaHash *tabla, int ci);
+int validarCI(char ci[15], int caso );
+void EscribirEnArchivoTXT(const char *nombreArchivo, TablaHash *tabla);
+TablaHash *obtener_datos_perfil();
+tusuario *leer_usuario(TablaHash *tabla, int ci);
+
+//REGISTRO ACTIVIDAD
+void liberarArbolActividad(tactividad* raiz);
+int tomarDistancia();
+int tomarTiempo();
+tfecha ObtenerFecha();
+void calcularUCABCOIN( tusuario *persona, tactividad *actividad );
+void determinarInsigniaNivel(tusuario *persona);
+tactividad *ObtenerDatosActividades(tusuario *persona);
+void imprimirActividad(tactividad *actividad);
+void imprimirArbolActividad(tactividad *actividad);
+tactividad *insertarActividad(tactividad *arbol, tactividad *actividad);
+tactividad *leerArbolActividad(const char *filename);
+void guardarActividad(FILE *file, tactividad *arbolActividad, tactividad *actividad);
+void guardarDatosEnArchivo(const char *filename, tactividad *arbol, tactividad *arbolActividad);
+
+
+
+
+#endif /* LIBRERIA_H */
